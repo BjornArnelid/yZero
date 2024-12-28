@@ -20,3 +20,8 @@ class AbstractValue:
     def adjust(self, value):
         """ Adjusts attribute value by adding or subtracting value. """
         self.set_value(self.value + value)
+
+
+class ResourcePool:
+    """ Zero engine resource pool for health and resolve."""
+    pass

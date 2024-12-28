@@ -9,7 +9,7 @@ from src.yzero.values import AbstractValue
 def create_empty_step_dice_character():
     """ Creates a character with step dice values for attributes and skills."""
     return Character({attribute: StepDiceAttributeValue(C) for attribute in defaults.ATTRIBUTES},
-                     {skill: StepDiceAttributeValue(NONE) for skill in defaults.SKILLS})
+                     {skill: StepDiceSkillValue(NONE, skill.attribute) for skill in defaults.SKILLS})
 
 
 def count_attributes(character, level):

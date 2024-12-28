@@ -25,6 +25,8 @@ class Character:
             gear = []
         self.gear = gear
         self.name = name
+        self.health_pool = None
+        self.resolve_pool = None
 
     def set_attribute(self, attribute, value):
         """Replaces existing attribute value with new attribute."""
@@ -85,6 +87,8 @@ class Character:
             if value.value > 0:
                 print(get_string(key.name) + ": " + str(value))
 
+    def is_alive(self):
+        return True
 
     def print(self):
         print("\n################")
