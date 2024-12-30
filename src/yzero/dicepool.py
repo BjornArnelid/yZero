@@ -1,9 +1,10 @@
 from src.yzero import defaults
 from src.yzero.character import Character, Archetype
+from src.yzero.defaults import STRENGTH, AGILITY, WITS, EMPATHY
 from src.yzero.dice import roll_dice_pool_success
 from src.yzero.errors import YZeroCharacterError
 from src.yzero.translation import get_string
-from src.yzero.values import AbstractValue
+from src.yzero.values import AbstractValue, ResourcePool
 
 
 class DicePoolCharacter(Character):
@@ -16,6 +17,7 @@ class DicePoolCharacter(Character):
         if skills is None:
             skills = {skill: DicePoolSkillValue(0, skill.attribute, 0, 2) for skill in defaults.SKILLS}
         self.skills = skills
+        self.calculate_resource_pools()
 
 
     def count_attributes(self):
@@ -31,6 +33,7 @@ class DicePoolCharacter(Character):
             self.attributes[attribute] = self.archetype.to_attribute(attribute, value)
         else:
             self.attributes[attribute] = DicePoolAttributeValue(value)
+        self.calculate_resource_pools()
 
     def set_skill(self, skill, value):
         if skill not in self.skills:
@@ -40,6 +43,11 @@ class DicePoolCharacter(Character):
         else:
             self.skills[skill] = DicePoolSkillValue(value, skill.attribute)
 
+    def calculate_resource_pools(self):
+        resource_value = int((self.attributes[STRENGTH].value + self.attributes[AGILITY].value) / 2 + 1.5)
+        self.health_pool = ResourcePool(resource_value)
+        resource_value = int((self.attributes[WITS].value + self.attributes[EMPATHY].value) / 2 + 1.5)
+        self.resolve_pool = ResourcePool(resource_value)
 
 
 

@@ -5,6 +5,9 @@ class AttributeTemplate:
     def __init__(self, name):
         self.name = name
 
+    def __str__(self):
+        return get_string(self.name)
+
 
 STRENGTH = AttributeTemplate('attribute_strength')
 AGILITY = AttributeTemplate('attribute_agility')
@@ -18,6 +21,8 @@ class SkillTemplate:
         self.name = name
         self.attribute = attribute
 
+    def __str__(self):
+        return get_string(self.name)
 
 # Skills
 FORCE = SkillTemplate("skill_force", STRENGTH)

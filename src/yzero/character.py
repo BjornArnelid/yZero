@@ -1,5 +1,4 @@
 from src.yzero.errors import YZeroCharacterError
-from src.yzero.translation import get_string
 from src.yzero.values import AbstractValue
 
 
@@ -80,15 +79,12 @@ class Character:
 
     def print_attributes(self):
         for key, value in self.attributes.items():
-            print(get_string(key.name) + ": " + str(value))
+            print(str(key) + ": " + str(value))
 
     def print_skills(self):
         for key, value in self.skills.items():
             if value.value > 0:
-                print(get_string(key.name) + ": " + str(value))
-
-    def is_alive(self):
-        return True
+                print(str(key) + ": " + str(value))
 
     def print(self):
         print("\n################")
@@ -107,6 +103,8 @@ class Character:
         print("\nGear:")
         for item in self.gear:
             print(str(item))
+        print("Health pool: " + str(self.health_pool.current) + "/" + str(self.health_pool.limit))
+        print("Resolve pool: " + str(self.resolve_pool.current) + "/" + str(self.resolve_pool.limit))
 
 
 class Archetype:

@@ -1,15 +1,35 @@
 from src.yzero import defaults
 from src.yzero.character import Character
+from src.yzero.defaults import STRENGTH, AGILITY, WITS, EMPATHY
 from src.yzero.dice import roll_dice
 from src.yzero.errors import YZeroCharacterError
 from src.yzero.translation import get_string
-from src.yzero.values import AbstractValue
+from src.yzero.values import AbstractValue, ResourcePool
 
 
-def create_empty_step_dice_character():
-    """ Creates a character with step dice values for attributes and skills."""
-    return Character({attribute: StepDiceAttributeValue(C) for attribute in defaults.ATTRIBUTES},
-                     {skill: StepDiceSkillValue(NONE, skill.attribute) for skill in defaults.SKILLS})
+class StepDiceCharacter(Character):
+    """ Character with step dice values for attributes and skills."""
+
+    def __init__(self, attributes, skills, archetype=None, specialities=None, items=None, traits=None,
+                 gear=None, name=None):
+        super().__init__(archetype, specialities, items, traits, gear, name)
+        if attributes is None:
+            attributes = {attribute: StepDiceAttributeValue(C) for attribute in defaults.ATTRIBUTES}
+        self.attributes = attributes
+        if skills is None:
+            skills = {skill: StepDiceSkillValue(NONE, skill.attribute) for skill in defaults.SKILLS}
+        self.skills = skills
+        self.calculate_resource_pools()
+
+    def set_attribute(self, attribute, value):
+        super().set_attribute(attribute, value)
+        self.calculate_resource_pools()
+
+    def calculate_resource_pools(self):
+        resource_value = int((self.attributes[STRENGTH].dice_size() + self.attributes[AGILITY].dice_size()) / 4 + 0.5)
+        self.health_pool = ResourcePool(resource_value)
+        resource_value = int((self.attributes[WITS].dice_size() + self.attributes[EMPATHY].dice_size()) / 4 + 0.5)
+        self.resolve_pool = ResourcePool(resource_value)
 
 
 def count_attributes(character, level):
@@ -38,30 +58,6 @@ B = 3
 A = 4
 
 
-def calculate_dice_size(value):
-    if value == 0:
-        return 0
-    elif value == D:
-        return 6
-    elif value == C:
-        return 8
-    elif value == B:
-        return 10
-    elif value == A:
-        return 12
-    raise YZeroCharacterError("Invalid value for StepDiceAttribute")
-
-
-def roll(dice_size):
-    """ Rolls a step dice value and returns the result."""
-    result = roll_dice(dice_size)
-    if result >= 10:
-        return 2
-    elif result >= 6:
-        return 1
-    return 0
-
-
 class StepDiceAttributeValue(AbstractValue):
     """ Step dice value for attributes with a value between A and D.
         Only Primary attributes can have a value of 5."""
@@ -69,12 +65,8 @@ class StepDiceAttributeValue(AbstractValue):
     def __init__(self, value=C):
         super().__init__(value, 1, 4)
 
-    def set_starting_value(self, value, key_skill=False, allow_one=False):
-        """ Sets the starting value for the attribute or skill. """
-        self.set_value(value)
-
     def dice_size(self):
-        calculate_dice_size(self.value)
+        return calculate_dice_size(self.value)
 
     def roll(self):
         """ Rolls for attribute success based on value.
@@ -100,16 +92,8 @@ class StepDiceSkillValue(AbstractValue):
         super().__init__(value, 0, A)
         self.attribute = attribute
 
-    def set_starting_value(self, value, key_skill=False, allow_one=False):
-        """ Sets the starting value for the attribute or skill. """
-        if value == B and not key_skill:
-            raise YZeroCharacterError("Only skills listed in archetype can have a value of B")
-        elif value > B:
-            raise YZeroCharacterError("Skill value can not be set to A during character creation")
-        self.set_value(value)
-
     def dice_size(self):
-        calculate_dice_size(self.value)
+        return calculate_dice_size(self.value)
 
     def roll(self):
         return self.attribute.roll() + roll(self.dice_size())
@@ -126,3 +110,28 @@ class StepDiceSkillValue(AbstractValue):
         elif self.value == A:
             return get_string("skill_elite")
         raise YZeroCharacterError("Invalid value for StepDiceAttribute")
+
+
+
+def calculate_dice_size(value):
+    if value == 0:
+        return 0
+    elif value == D:
+        return 6
+    elif value == C:
+        return 8
+    elif value == B:
+        return 10
+    elif value == A:
+        return 12
+    raise YZeroCharacterError("Invalid value for StepDiceAttribute")
+
+
+def roll(dice_size):
+    """ Rolls a step dice value and returns the result."""
+    result = roll_dice(dice_size)
+    if result >= 10:
+        return 2
+    elif result >= 6:
+        return 1
+    return 0

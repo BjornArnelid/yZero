@@ -24,4 +24,6 @@ class AbstractValue:
 
 class ResourcePool:
     """ Zero engine resource pool for health and resolve."""
-    pass
+    def __init__(self, max_amount):
+        self.limit = max_amount
+        self.current = max_amount
